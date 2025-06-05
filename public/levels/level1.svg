@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="800" viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background configuration -->
+  <rect class="background" fill="#1a1a2e" data-stars="true" width="100%" height="100%"/>
+
+  <!-- Player starting position -->
+  <circle class="player-start" cx="100" cy="500" r="16" fill="#4ecdc4" opacity="0.5"/>
+
+  <!-- Ground and main platforms -->
+  <rect class="platform" x="0" y="740" width="1600" height="60" fill="#95a5a6"/>
+  <rect class="platform" x="200" y="600" width="150" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="400" y="500" width="120" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="600" y="400" width="180" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="150" y="450" width="100" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="550" y="300" width="140" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="900" y="550" width="160" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="1200" y="450" width="140" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="1100" y="300" width="120" height="20" fill="#95a5a6"/>
+  <rect class="platform" x="1400" y="500" width="180" height="20" fill="#95a5a6"/>
+
+  <!-- Special platforms -->
+  <rect class="platform moving" x="800" y="350" width="100" height="20" fill="#3498db" data-speed="2"/>
+  <rect class="platform ice" x="750" y="200" width="120" height="20" fill="#74b9ff"/>
+
+  <!-- Collectibles scattered throughout the level -->
+  <circle class="collectible-coin" cx="275" cy="580" r="12" fill="#ffd700"/>
+  <circle class="collectible-coin" cx="325" cy="580" r="12" fill="#ffd700"/>
+  <circle class="collectible-coin" cx="200" cy="420" r="12" fill="#ffd700"/>
+  <circle class="collectible-gem" cx="460" cy="470" r="10" fill="#9c27b0"/>
+  <circle class="collectible-gem" cx="690" cy="370" r="10" fill="#9c27b0"/>
+  <circle class="collectible-star" cx="620" cy="270" r="15" fill="#ffeb3b"/>
+  <circle class="collectible-coin" cx="980" cy="520" r="12" fill="#ffd700"/>
+  <circle class="collectible-coin" cx="1270" cy="420" r="12" fill="#ffd700"/>
+  <circle class="collectible-gem" cx="1160" cy="270" r="10" fill="#9c27b0"/>
+  <circle class="collectible-star" cx="810" cy="270" r="15" fill="#ffeb3b"/>
+  <circle class="collectible-coin" cx="1480" cy="470" r="12" fill="#ffd700"/>
+
+  <!-- Level progression orb -->
+  <circle class="orb" cx="1500" cy="460" r="20" fill="#00ffff" stroke="#0080ff" stroke-width="3" data-target-level="2"/>
+  <circle class="orb" cx="1500" cy="460" r="15" fill="#ffffff" opacity="0.3"/>
+  <circle class="orb" cx="1500" cy="460" r="10" fill="#00ffff" opacity="0.6"/>
+
+  <!-- Enemies with patrol patterns -->
+  <circle class="enemy-goomba" cx="500" cy="700" r="16" fill="#8b4513" data-patrol="100"/>
+  <circle class="enemy-goomba" cx="750" cy="700" r="16" fill="#8b4513" data-patrol="80"/>
+  <circle class="enemy-spike" cx="300" cy="600" r="12" fill="#ff4757"/>
+  <circle class="enemy-flying" cx="700" cy="250" r="14" fill="#5f27cd" data-patrol="150"/>
+  <circle class="enemy-goomba" cx="1300" cy="700" r="16" fill="#8b4513" data-patrol="120"/>
+</svg>

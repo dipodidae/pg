@@ -16,6 +16,9 @@ export interface InputState {
   left: boolean
   right: boolean
   jump: boolean
+  restart: boolean
+  next: boolean
+  debug: boolean
   [key: string]: boolean
 }
 

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="44" viewBox="0 0 32 44" xmlns="http://www.w3.org/2000/svg">
+  <!-- Player jumping pose -->
+
+  <!-- Body (stretched upward) -->
+  <rect x="4" y="18" width="24" height="14" fill="#4ECDC4" rx="2"/>
+
+  <!-- Head (slightly tilted up) -->
+  <rect x="6" y="4" width="20" height="16" fill="#FFE66D" rx="4"/>
+
+  <!-- Eyes (looking up) -->
+  <rect x="9" y="7" width="3" height="3" fill="#000000"/>
+  <rect x="20" y="7" width="3" height="3" fill="#000000"/>
+
+  <!-- Mouth (excited) -->
+  <ellipse cx="16" cy="13" rx="4" ry="2" fill="none" stroke="#000000" stroke-width="1"/>
+
+  <!-- Arms (raised up) -->
+  <rect x="0" y="12" width="4" height="12" fill="#FFE66D" rx="2" transform="rotate(-30 2 18)"/>
+  <rect x="28" y="12" width="4" height="12" fill="#FFE66D" rx="2" transform="rotate(30 30 18)"/>
+
+  <!-- Legs (tucked up) -->
+  <rect x="8" y="30" width="6" height="6" fill="#4ECDC4" rx="1" transform="rotate(-10 11 33)"/>
+  <rect x="18" y="30" width="6" height="6" fill="#4ECDC4" rx="1" transform="rotate(10 21 33)"/>
+
+  <!-- Feet (pointing down) -->
+  <rect x="6" y="36" width="8" height="4" fill="#FF6B6B" rx="2" transform="rotate(-20 10 38)"/>
+  <rect x="18" y="36" width="8" height="4" fill="#FF6B6B" rx="2" transform="rotate(20 22 38)"/>
+</svg>

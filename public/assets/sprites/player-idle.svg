@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="44" viewBox="0 0 32 44" xmlns="http://www.w3.org/2000/svg">
+  <!-- Player idle pose -->
+
+  <!-- Body -->
+  <rect x="4" y="16" width="24" height="16" fill="#4ECDC4" rx="2"/>
+
+  <!-- Head -->
+  <rect x="6" y="4" width="20" height="16" fill="#FFE66D" rx="4"/>
+
+  <!-- Eyes -->
+  <rect x="9" y="8" width="3" height="3" fill="#000000"/>
+  <rect x="20" y="8" width="3" height="3" fill="#000000"/>
+
+  <!-- Mouth (slight smile) -->
+  <ellipse cx="16" cy="14" rx="3" ry="1" fill="none" stroke="#000000" stroke-width="1"/>
+
+  <!-- Arms (relaxed at sides) -->
+  <rect x="0" y="18" width="4" height="12" fill="#FFE66D" rx="2"/>
+  <rect x="28" y="18" width="4" height="12" fill="#FFE66D" rx="2"/>
+
+  <!-- Legs -->
+  <rect x="8" y="32" width="6" height="8" fill="#4ECDC4" rx="1"/>
+  <rect x="18" y="32" width="6" height="8" fill="#4ECDC4" rx="1"/>
+
+  <!-- Feet -->
+  <rect x="6" y="40" width="8" height="4" fill="#FF6B6B" rx="2"/>
+  <rect x="18" y="40" width="8" height="4" fill="#FF6B6B" rx="2"/>
+</svg>

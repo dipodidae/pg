@@ -25,6 +25,9 @@ export class Game {
       left: false,
       right: false,
       jump: false,
+      restart: false,
+      next: false,
+      debug: false,
     }
 
     this.setupInputHandling()
@@ -65,6 +68,9 @@ export class Game {
       Space: 'jump',
       ArrowUp: 'jump',
       KeyW: 'jump',
+      KeyR: 'restart',
+      KeyN: 'next',
+      KeyQ: 'debug',
     }
 
     window.addEventListener('keydown', (e) => {
@@ -104,13 +110,13 @@ export class Game {
   async start(): Promise<void> {
     // Initialize PIXI app first
     await this.initPixiApp()
-    
+
     // Create scene manager after app is initialized
     this.sceneManager = new SceneManager(this.app)
-    
+
     // Setup resize handling after app is ready
     this.setupResizeHandling()
-    
+
     this.sceneManager.gameState = GameState.LOADING
 
     // Start the main game scene

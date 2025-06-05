@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="44" viewBox="0 0 32 44" xmlns="http://www.w3.org/2000/svg">
+  <!-- Player falling pose -->
+
+  <!-- Body (slightly compressed) -->
+  <rect x="4" y="17" width="24" height="15" fill="#4ECDC4" rx="2"/>
+
+  <!-- Head -->
+  <rect x="6" y="4" width="20" height="16" fill="#FFE66D" rx="4"/>
+
+  <!-- Eyes (looking down) -->
+  <rect x="9" y="11" width="3" height="3" fill="#000000"/>
+  <rect x="20" y="11" width="3" height="3" fill="#000000"/>
+
+  <!-- Mouth (worried) -->
+  <ellipse cx="16" cy="15" rx="3" ry="1" fill="none" stroke="#000000" stroke-width="1" transform="rotate(180 16 15)"/>
+
+  <!-- Arms (flailing) -->
+  <rect x="0" y="14" width="4" height="12" fill="#FFE66D" rx="2" transform="rotate(-45 2 20)"/>
+  <rect x="28" y="14" width="4" height="12" fill="#FFE66D" rx="2" transform="rotate(45 30 20)"/>
+
+  <!-- Legs (dangling) -->
+  <rect x="8" y="32" width="6" height="8" fill="#4ECDC4" rx="1"/>
+  <rect x="18" y="32" width="6" height="8" fill="#4ECDC4" rx="1"/>
+
+  <!-- Feet (loose) -->
+  <rect x="6" y="40" width="8" height="4" fill="#FF6B6B" rx="2"/>
+  <rect x="18" y="40" width="8" height="4" fill="#FF6B6B" rx="2"/>
+</svg>

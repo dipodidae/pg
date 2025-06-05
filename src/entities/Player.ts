@@ -2,7 +2,7 @@ import type { Game } from '@/core/Game'
 import type { Vector2 } from '@/core/types'
 import * as PIXI from 'pixi.js'
 import { ParticleSystem } from '@/effects/ParticleSystem'
-import { SpriteGenerator } from '@/utils/SpriteGenerator'
+import { PlayerAnimationState, PlayerAnimationSystem } from './PlayerAnimationSystem'
 
 export class Player {
   public sprite!: PIXI.Container
@@ -10,18 +10,25 @@ export class Player {
   public isOnGround: boolean = false
 
   private game: Game
-  private playerGraphics!: PIXI.Graphics
+  private animationSystem!: PlayerAnimationSystem
   private particles!: ParticleSystem
   private speed: number = 8
   private jumpPower: number = 18
   private size: number = 32
   private groundY: number
+  private platformCollisionCheck?: (playerBounds: PIXI.Rectangle) => { x: number, y: number, width: number, height: number } | null
+  private debugBox!: PIXI.Graphics
+  private showDebug: boolean = true
+  private worldWidth: number = 0
+  private worldHeight: number = 0
+  private currentPlatform: { x: number, y: number, width: number, height: number } | null = null
 
   // Animation properties
   private animationTimer: number = 0
   private isMoving: boolean = false
   private facingRight: boolean = true
   private wasOnGround: boolean = false
+  private fallTimer: number = 0 // Prevent rapid fall animation switching
 
   // Juice effects
   private landingScale: number = 1
@@ -42,13 +49,24 @@ export class Player {
 
   private createSprite(): void {
     this.sprite = new PIXI.Container()
-    this.playerGraphics = SpriteGenerator.createPlayerSprite()
-    this.sprite.addChild(this.playerGraphics)
+    this.animationSystem = new PlayerAnimationSystem()
+    this.sprite.addChild(this.animationSystem.getSprite())
 
     // Add subtle glow filter
     const colorMatrix = new PIXI.ColorMatrixFilter()
     colorMatrix.brightness(1.2, false)
     this.sprite.filters = [colorMatrix]
+
+    // Create debug collision box
+    this.createDebugBox()
+  }
+
+  private createDebugBox(): void {
+    this.debugBox = new PIXI.Graphics()
+    this.debugBox.rect(-this.size / 2, -this.size / 2, this.size, this.size)
+    this.debugBox.stroke({ color: 0xFF00FF, width: 2, alpha: 0.8, pixelLine: true })
+    this.debugBox.visible = this.showDebug
+    this.sprite.addChild(this.debugBox)
   }
 
   private setupInitialPosition(): void {
@@ -61,7 +79,6 @@ export class Player {
     this.updatePhysics(deltaTime)
     this.updateAnimation(deltaTime)
     this.updateEffects(deltaTime)
-    this.checkCollisions()
   }
 
   private handleInput(): void {
@@ -87,6 +104,7 @@ export class Player {
     if (input.jump && this.isOnGround) {
       this.velocity.y = -this.jumpPower
       this.isOnGround = false
+      this.currentPlatform = null // Clear platform reference when jumping
       this.game.sceneManager.soundManager?.playJumpSound()
 
       if (this.particles) {
@@ -103,19 +121,124 @@ export class Player {
     if (!this.isOnGround) {
       this.velocity.y += this.game.config.gravity * deltaTime
     }
+    else {
+      // When on ground/platform, dampen any small vertical velocity to prevent trembling
+      if (Math.abs(this.velocity.y) < 0.5) {
+        this.velocity.y = 0
+      }
+    }
 
-    // Update position
+    // Update horizontal position first
     this.sprite.x += this.velocity.x * deltaTime
-    this.sprite.y += this.velocity.y * deltaTime
 
-    // Screen boundaries
+    // Update vertical position
+    const newY = this.sprite.y + this.velocity.y * deltaTime
+
+    // Check for platform collisions
+    let hitPlatform = false
+    if (this.platformCollisionCheck) {
+      // First, check if we're still on our current platform
+      if (this.currentPlatform && this.isOnGround) {
+        const platformTop = this.currentPlatform.y
+        const playerBottom = this.sprite.y + this.size / 2
+        const playerLeft = this.sprite.x - this.size / 2
+        const playerRight = this.sprite.x + this.size / 2
+        const platformLeft = this.currentPlatform.x
+        const platformRight = this.currentPlatform.x + this.currentPlatform.width
+
+        // Check if we're still horizontally on the platform and close to the top
+        const onPlatformHorizontally = playerRight > platformLeft && playerLeft < platformRight
+        const nearPlatformTop = Math.abs(playerBottom - platformTop) <= 3
+        const notJumping = this.velocity.y >= -1
+
+        if (onPlatformHorizontally && nearPlatformTop && notJumping) {
+          // Stay on current platform - only adjust Y if we've drifted
+          if (Math.abs(playerBottom - platformTop) > 1) {
+            this.sprite.y = platformTop - this.size / 2
+          }
+          this.velocity.y = 0
+          this.isOnGround = true
+          hitPlatform = true
+        }
+        else {
+          // Left the platform
+          this.currentPlatform = null
+        }
+      }
+
+      // If not on a platform, check for new platform collision
+      if (!hitPlatform) {
+        const futurePlayerBounds = new PIXI.Rectangle(
+          this.sprite.x - this.size / 2,
+          newY - this.size / 2,
+          this.size,
+          this.size,
+        )
+
+        const platform = this.platformCollisionCheck(futurePlayerBounds)
+        if (platform && this.velocity.y >= 0) { // Only when falling or stationary
+          const platformTop = platform.y
+          const playerBottom = newY + this.size / 2
+          const currentPlayerBottom = this.sprite.y + this.size / 2
+
+          // Check if we're landing on top of platform (not inside it)
+          if (currentPlayerBottom <= platformTop + 5 && playerBottom >= platformTop) {
+            this.sprite.y = platformTop - this.size / 2
+            this.velocity.y = 0
+            this.isOnGround = true
+            this.currentPlatform = platform
+            hitPlatform = true
+
+            if (!this.wasOnGround) {
+              // Landing effects
+              this.game.sceneManager.soundManager?.playLandSound()
+              if (this.particles) {
+                this.particles.emitLandDust(this.sprite.x, this.sprite.y + this.size / 2)
+              }
+              this.landingScale = 1.3
+            }
+          }
+        }
+      }
+    }
+
+    // If we didn't hit a platform, update Y position normally
+    if (!hitPlatform) {
+      this.sprite.y = newY
+
+      // Check ground collision
+      const groundLevel = this.groundY
+      if (this.sprite.y >= groundLevel && this.velocity.y >= 0) {
+        if (!this.wasOnGround) {
+          // Landing effects
+          this.game.sceneManager.soundManager?.playLandSound()
+          if (this.particles) {
+            this.particles.emitLandDust(this.sprite.x, this.sprite.y + this.size / 2)
+          }
+          this.landingScale = 1.3
+        }
+        this.sprite.y = groundLevel
+        this.velocity.y = 0
+        this.isOnGround = true
+      }
+      else {
+        this.isOnGround = false
+        this.currentPlatform = null // Clear platform reference when falling
+      }
+    }
+
+    this.wasOnGround = this.isOnGround
+
+    // Screen boundaries - use world dimensions if available, otherwise fall back to screen
     const halfSize = this.size / 2
+    const rightBoundary = this.worldWidth > 0 ? this.worldWidth : this.game.config.width
+
     if (this.sprite.x < halfSize) {
       this.sprite.x = halfSize
       this.velocity.x = 0
     }
-    else if (this.sprite.x > this.game.config.width - halfSize) {
-      this.sprite.x = this.game.config.width - halfSize
+    else if (this.sprite.x > rightBoundary - halfSize) {
+      this.sprite.x = rightBoundary - halfSize
       this.velocity.x = 0
     }
   }
@@ -123,17 +246,48 @@ export class Player {
   private updateAnimation(deltaTime: number): void {
     this.animationTimer += deltaTime
 
-    // Walking animation - bob up and down
-    if (this.isMoving && this.isOnGround) {
-      const bobAmount = Math.sin(this.animationTimer * 0.3) * 2
-      this.playerGraphics.y = bobAmount
+    // Update animation system
+    this.animationSystem.update(deltaTime)
+
+    // Update fall timer for stable animation switching
+    if (!this.isOnGround) {
+      this.fallTimer += deltaTime
     }
     else {
-      this.playerGraphics.y = 0
+      this.fallTimer = 0
     }
 
+    // Determine animation state with stability
+    let animationState = PlayerAnimationState.IDLE
+    if (!this.isOnGround) {
+      if (this.velocity.y < 0) {
+        animationState = PlayerAnimationState.JUMP
+        this.fallTimer = 0 // Reset fall timer when jumping
+      }
+      else if (this.fallTimer > 100) { // Only show fall after 100ms of falling
+        animationState = PlayerAnimationState.FALL
+      }
+      else {
+        // Stay in previous state during brief air time
+        animationState = this.isMoving ? PlayerAnimationState.WALK : PlayerAnimationState.IDLE
+      }
+    }
+    else if (this.isMoving) {
+      animationState = PlayerAnimationState.WALK
+    }
+
+    // Handle landing animation (takes priority)
+    if (this.isOnGround && !this.wasOnGround) {
+      animationState = PlayerAnimationState.LAND
+    }
+
+    this.animationSystem.setState(animationState)
+
     // Facing direction
-    this.playerGraphics.scale.x = this.facingRight ? 1 : -1
+    this.animationSystem.setFacing(this.facingRight)
+
+    // Apply scaling effects (landing bounce and squash/stretch)
+    this.animationSystem.setScale(1, this.landingScale * this.squashStretch)
 
     // Landing bounce effect
     if (this.landingScale > 1) {
@@ -144,9 +298,6 @@ export class Player {
     if (this.squashStretch < 1) {
       this.squashStretch = Math.min(1, this.squashStretch + 0.1 * deltaTime)
     }
-
-    // Apply scaling effects
-    this.playerGraphics.scale.y = this.landingScale * this.squashStretch
   }
 
   private updateEffects(_deltaTime: number): void {
@@ -155,30 +306,20 @@ export class Player {
     }
   }
 
-  private checkCollisions(): void {
-    // Ground collision
-    const groundLevel = this.groundY
-    if (this.sprite.y >= groundLevel && this.velocity.y >= 0) {
-      if (!this.wasOnGround) {
-        // Just landed - create landing effect
-        this.game.sceneManager.soundManager?.playLandSound()
+  // Remove the old checkCollisions method since collision is now handled in updatePhysics
 
-        if (this.particles) {
-          this.particles.emitLandDust(this.sprite.x, this.sprite.y + this.size / 2)
-        }
+  setPlatformCollisionCheck(collisionCheck: (playerBounds: PIXI.Rectangle) => { x: number, y: number, width: number, height: number } | null): void {
+    this.platformCollisionCheck = collisionCheck
+  }
 
-        this.landingScale = 1.3 // Bounce effect
-      }
+  setWorldBoundaries(width: number, height: number): void {
+    this.worldWidth = width
+    this.worldHeight = height
+  }
 
-      this.sprite.y = groundLevel
-      this.velocity.y = 0
-      this.isOnGround = true
-    }
-    else {
-      this.isOnGround = false
-    }
-
-    this.wasOnGround = this.isOnGround
+  toggleDebug(): void {
+    this.showDebug = !this.showDebug
+    this.debugBox.visible = this.showDebug
   }
 
   getPosition(): Vector2 {
@@ -195,6 +336,9 @@ export class Player {
   }
 
   destroy(): void {
+    if (this.animationSystem) {
+      this.animationSystem.destroy()
+    }
     if (this.sprite.parent) {
       this.sprite.parent.removeChild(this.sprite)
     }
