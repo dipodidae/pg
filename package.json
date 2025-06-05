@@ -1,0 +1,24 @@
+{
+  "name": "platformer-game",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "pixi.js": "^8.10.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.13.3",
+    "@types/node": "^22.15.29",
+    "eslint": "^9.28.0",
+    "eslint-plugin-format": "^1.0.1",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
+}
