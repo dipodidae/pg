@@ -27,18 +27,15 @@ export class Game {
       jump: false,
     }
 
-    this.initPixiApp()
-    this.sceneManager = new SceneManager(this.app)
     this.setupInputHandling()
-    this.setupResizeHandling()
   }
 
-  private initPixiApp(): void {
+  private async initPixiApp(): Promise<void> {
     // Create empty application first, then initialize with options
     this.app = new PIXI.Application()
 
     // Initialize with options using the recommended init() method
-    this.app.init({
+    await this.app.init({
       width: this.config.width,
       height: this.config.height,
       backgroundColor: this.config.backgroundColor,
@@ -105,6 +102,15 @@ export class Game {
   }
 
   async start(): Promise<void> {
+    // Initialize PIXI app first
+    await this.initPixiApp()
+    
+    // Create scene manager after app is initialized
+    this.sceneManager = new SceneManager(this.app)
+    
+    // Setup resize handling after app is ready
+    this.setupResizeHandling()
+    
     this.sceneManager.gameState = GameState.LOADING
 
     // Start the main game scene
